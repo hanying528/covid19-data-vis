@@ -1,6 +1,6 @@
 #!flask/bin/python
 import sqlite3
-from os.path import join
+from os.path import join, dirname
 
 from flask import Flask, jsonify
 import pandas as pd
@@ -8,7 +8,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-DATA_DIR = 'data'
+DATA_DIR = join(dirname(__file__), 'data')
 DB_NAME = 'covid_db.sqlite'
 DB_PATH = join(DATA_DIR, DB_NAME)
 SNAP_DT = '2022-03-30'
