@@ -1,0 +1,8 @@
+name: covid19vis
+channels:
+  - conda-forge
+dependencies:
+  - python ==3.7.*
+  - flask ==1.1.*
+  - markupsafe ==2.0.1
+  - pandas
