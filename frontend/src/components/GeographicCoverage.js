@@ -111,7 +111,7 @@ export default function GeographicCoverage(props) {
                 setUsaData(data);
                 
                 // set max and min case number
-                let total_usa_cases = data.map(datum => datum.total_cases);
+                let total_usa_cases = data.map(datum => datum.people_vaccinated_per_hundred);
                 setMaxCase(Math.max.apply(null, total_usa_cases));
                 setMinCase(Math.min.apply(null, total_usa_cases));
             })
@@ -139,15 +139,14 @@ export default function GeographicCoverage(props) {
     function mapHandler(event) {
         const stateData = usaData.filter(datum => datum.state === event.target.dataset.name)[0];
         const display = document.getElementById("geographic-coverage-text");
-        display.textContent = `${stateData.state} ${stateData.total_cases}`;
+        display.textContent = `${stateData.state} ${stateData.people_vaccinated_per_hundred}%`;
     };
 
     function getStatesCustomConfig() {
         var config = {};
-
         if (usaData) {
             for (var i = 0; i < usaData.length; i++) {
-                config[usaData[i].state] = { fill: _getColorByCaseNum(usaData[i].total_cases) }
+                config[usaData[i].state] = { fill: _getColorByCaseNum(usaData[i].people_vaccinated_per_hundred) }
             }
         }
         return config;
@@ -159,18 +158,17 @@ export default function GeographicCoverage(props) {
             for (var i = 0; i < worldData.length; i++) {
                 let countryCode = getCode(worldData[i].country_name);
                 if (countryCode) {
-                    data.push({country: countryCode, value: worldData[i].total_cases });
+                    data.push({country: countryCode, value: worldData[i].people_vaccinated_per_hundred });
                 }
             }
         }
-
         return data;
     };
 
     return (
         <div className="geographic-container">
             <h1>Geographic Coverage</h1>
-            <h5>Total COVID Cases</h5>
+            <h5>Vaccination Rate</h5>
             <div className="switch-wrapper">
                 <span>USA</span><Form.Switch 
                     id="geographic-switch"
@@ -183,7 +181,7 @@ export default function GeographicCoverage(props) {
                 showWorldMap ?
                 <WorldMap
                     color="red"
-                    value-suffix="total cases"
+                    valueSuffix="%"
                     size="xxl"
                     data={getWorldData()}
                 /> :
@@ -191,8 +189,7 @@ export default function GeographicCoverage(props) {
                     <p id="geographic-coverage-text"></p> 
                     <USAMap customize={getStatesCustomConfig()} onClick={mapHandler} />
                 </div>
-            }
-            
+            }     
         </div>
     );
 }
