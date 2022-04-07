@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import { Form } from 'react-bootstrap';
 import USAMap from 'react-usa-map';
 import WorldMap from 'react-svg-worldmap';
 import './../styles/GeographicCoverage.css';
 
-const { overwrite, getCode, getName } = require('country-list');
+const { overwrite, getCode } = require('country-list');
 overwrite([{
     code: 'US',
     name: 'United States'
@@ -97,6 +98,7 @@ export default function GeographicCoverage(props) {
     const [worldData, setWorldData] = useState(null);
     const [maxCase, setMaxCase] = useState(null);
     const [minCase, setMinCase] = useState(null);
+    const [showWorldMap, setShowWorldMap] = useState(false);
 
     useEffect(() => {
         // Request usa data
@@ -136,7 +138,7 @@ export default function GeographicCoverage(props) {
 
     function mapHandler(event) {
         const stateData = usaData.filter(datum => datum.state === event.target.dataset.name)[0];
-        const display = document.getElementById("geographic-coverage");
+        const display = document.getElementById("geographic-coverage-text");
         display.textContent = `${stateData.state} ${stateData.total_cases}`;
     };
 
@@ -166,16 +168,31 @@ export default function GeographicCoverage(props) {
     };
 
     return (
-        <div>
+        <div className="geographic-container">
             <h1>Geographic Coverage</h1>
-            <USAMap customize={getStatesCustomConfig()} onClick={mapHandler} />
-            <p id="geographic-coverage"></p>
-            <WorldMap
-                color="red"
-                value-suffix="total cases"
-                size="xxl"
-                data={getWorldData()}
-            />
+            <h5>Total COVID Cases</h5>
+            <div className="switch-wrapper">
+                <span>USA</span><Form.Switch 
+                    id="geographic-switch"
+                    checked={showWorldMap}
+                    onChange={() => setShowWorldMap(!showWorldMap)}
+                    label="World"
+                />
+            </div>
+            { 
+                showWorldMap ?
+                <WorldMap
+                    color="red"
+                    value-suffix="total cases"
+                    size="xxl"
+                    data={getWorldData()}
+                /> :
+                <div className="usa-map">
+                    <p id="geographic-coverage-text"></p> 
+                    <USAMap customize={getStatesCustomConfig()} onClick={mapHandler} />
+                </div>
+            }
+            
         </div>
     );
 }
