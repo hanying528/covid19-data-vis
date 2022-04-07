@@ -32,7 +32,8 @@ def get_world_covid_data_snapshot(country=None):
                        new_deaths,
                        total_cases
                 from covid_world_hist
-                where date='{SNAP_DT}'"""
+                where date='{SNAP_DT}'
+                and people_vaccinated_per_hundred not null"""
     if country:
         query += f"and location='{country}'"
 
@@ -55,6 +56,7 @@ def get_us_state_covid_data_snapshot(state=None):
                       total_cases
                 from covid_us_hist
                 where date='{snap_dt}'
+                and people_vaccinated_per_hundred not null
                 {state_filter}
                 group by 1, 2
                 order by 1, 2
@@ -158,6 +160,7 @@ def get_covid_data_with_country_attr_snapshot(top_n=None):
                 from covid_world_hist
                 where date='{SNAP_DT}'
                 and population_density not null
+                and people_vaccinated_per_hundred not null
                 and country_name <> 'World'
                 order by total_cases desc, new_cases desc
                 """
