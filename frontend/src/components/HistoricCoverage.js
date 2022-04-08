@@ -1,10 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import './../styles/HistoricCoverage.css';
+import { Form } from 'react-bootstrap';
 
 
 export default function HistoricCoverage(props) {
     const [dailyData, setDailyData] = useState(null);
+    const [monthlyData, setMonthlyData] = useState(null);
+    const [showMonthly, setShowMonthly] = useState(false);
     const ref = useRef();
 
     useEffect(() => {
@@ -18,18 +21,43 @@ export default function HistoricCoverage(props) {
                 // Parse date time
                 let parseTime = d3.timeParse("%Y-%m-%d");
                 data.forEach(datum => {
-                    datum.date = parseTime(datum.date)
+                    datum.date = parseTime(datum.date);
                 });
                 setDailyData(data);
             })
             .catch(error => console.log(error));
+
+        // Request monthly data
+        const requestMonthly = {
+            method: 'GET',
+        };
+        fetch(`${props.backendUrl}/covid-usa-hist-monthly`, requestMonthly)
+            .then(response => response.json())
+            .then(data => {
+                // Parse date time
+                let parseTime = d3.timeParse("%Y-%m");
+                data.forEach(datum => {
+                    datum.year_month = parseTime(datum.year_month);
+                });
+                setMonthlyData(data);
+            })
+            .catch(error => console.log(error));
     }, []);
 
+    function _removeAllChildNodes(parent) {
+        while (parent.firstChild) {
+            parent.removeChild(parent.firstChild);
+        }
+    }
+
     useEffect(() => {
-        if (dailyData) {
+        _removeAllChildNodes(ref.current);
+        if (showMonthly && monthlyData) {
+            createGraph(monthlyData);
+        } else if (!showMonthly && dailyData) {
             createGraph(dailyData);
         }
-    }, [dailyData]);
+    }, [dailyData, monthlyData, showMonthly]);
 
     function createGraph(data) {
         // Set the dimensions and margins of the graph
@@ -48,7 +76,7 @@ export default function HistoricCoverage(props) {
 
         // Add X axis
         var x = d3.scaleTime()
-            .domain(d3.extent(data, datum => datum.date))
+            .domain(d3.extent(data, datum => showMonthly ? new Date(datum.year_month) : datum.date))
             .range([0, width]);
         var xAxis = SVG.append("g")
             .attr("transform", `translate(0, ${height})`)
@@ -85,7 +113,7 @@ export default function HistoricCoverage(props) {
 
         // Add the line
         var line = d3.line()
-                     .x(datum => x(datum.date))
+                     .x(datum => x(showMonthly ? datum.year_month : datum.date))
                      .y(datum => y(datum.avg_vaccination_rate_pct));
 
         var path = SVG.append("path")
@@ -101,7 +129,7 @@ export default function HistoricCoverage(props) {
             .data(data)
             .enter()
             .append("circle")
-                .attr("cx", datum => x(datum.date))
+                .attr("cx", datum => x(showMonthly ? datum.year_month : datum.date))
                 .attr("cy", datum => y(datum.avg_vaccination_rate_pct))
                 .attr("r", 3)
                 .attr("fill", "#69b3a2");
@@ -130,12 +158,12 @@ export default function HistoricCoverage(props) {
 
             // Update the points
             scatter.selectAll("circle")
-                .attr('cx', datum => newX(datum.date))
+                .attr('cx', datum => newX(showMonthly ? datum.year_month : datum.date))
                 .attr('cy', datum => newY(datum.avg_vaccination_rate_pct));
 
             // Update the line
             var line = d3.line()
-                .x(datum => newX(datum.date))
+                .x(datum => newX(showMonthly ? datum.year_month : datum.date))
                 .y(datum => newY(datum.avg_vaccination_rate_pct));
 
             path.attr("d", line);    
@@ -145,6 +173,15 @@ export default function HistoricCoverage(props) {
     return (
         <div className="historic-container">
             <h1>Historic Coverage</h1>
+            <h5>Vaccination Rate in USA</h5>
+            <div className="switch-wrapper">
+                <span>Daily</span><Form.Switch 
+                    id="historic-switch"
+                    checked={showMonthly}
+                    onChange={() => setShowMonthly(!showMonthly)}
+                    label="Monthly"
+                />
+            </div>
             <div ref={ref} />
         </div>
     )
