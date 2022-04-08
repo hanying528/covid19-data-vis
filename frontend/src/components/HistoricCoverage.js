@@ -51,7 +51,7 @@ export default function HistoricCoverage(props) {
     }
 
     useEffect(() => {
-        _removeAllChildNodes(ref.current);
+        _removeAllChildNodes(ref.current); // remove current graph
         if (showMonthly && monthlyData) {
             createGraph(monthlyData);
         } else if (!showMonthly && dailyData) {
@@ -124,6 +124,29 @@ export default function HistoricCoverage(props) {
             .attr("stroke-width", 1.5)
             .attr("d", line);
 
+        // Add tooltip for points
+        var tooltip = d3.select(ref.current)
+            .append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0)
+            .style("background-color", "black")
+            .style("border-radius", "5px")
+            .style("color", "white")
+            .style("padding", "10px");
+
+        var mouseover = function(event, d) {
+            console.log(event)
+            console.log(d)
+            tooltip.transition()
+                .style("opacity", 0.8);
+            var dailyOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            var monthlyOptions = { year: 'numeric', month: 'long' };
+            let date = showMonthly ? d.year_month.toLocaleDateString("en-US", monthlyOptions) : d.date.toLocaleDateString("en-US", dailyOptions);
+            tooltip.html(`${Math.round(d.avg_vaccination_rate_pct * 100) / 100}% on ${date}`)
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        };
+
         // Add the points
         scatter.selectAll("dot")
             .data(data)
@@ -131,11 +154,12 @@ export default function HistoricCoverage(props) {
             .append("circle")
                 .attr("cx", datum => x(showMonthly ? datum.year_month : datum.date))
                 .attr("cy", datum => y(datum.avg_vaccination_rate_pct))
-                .attr("r", 3)
-                .attr("fill", "#69b3a2");
+                .attr("r", 5)
+                .attr("fill", "#69b3a2")
+                .on("mouseover", mouseover);
 
         // Set zoom and pan
-        var zoom = d3.zoom().scaleExtent([1, 5])
+        var zoom = d3.zoom().scaleExtent([1, 10])
             .extent([[0, 0], [width, height]])
             .on("zoom", updateGraph);
 
@@ -145,6 +169,7 @@ export default function HistoricCoverage(props) {
             .style("fill", "none")
             .style("pointer-events", "all")
             .attr('transform', `translate(${margin.left},${margin.top})`)
+            .lower()
             .call(zoom);
 
         function updateGraph(event) {
