@@ -186,7 +186,7 @@ export default function GeographicCoverage(props) {
                     data={getWorldData()}
                 /> :
                 <div className="usa-map">
-                    <p id="geographic-coverage-text"></p> 
+                    <p id="geographic-coverage-text">Click on a state.</p> 
                     <USAMap customize={getStatesCustomConfig()} onClick={mapHandler} />
                 </div>
             }     
