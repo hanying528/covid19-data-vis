@@ -35,6 +35,7 @@ def get_world_covid_data_snapshot(country=None):
                        total_cases
                 from covid_world_hist
                 where date='{SNAP_DT}'
+                and new_deaths
                 and people_vaccinated_per_hundred not null"""
     if country:
         query += f"and location='{country}'"
