@@ -3,10 +3,12 @@ import sqlite3
 from os.path import join, dirname
 
 from flask import Flask, jsonify
+from flask_cors import CORS
 import pandas as pd
 
 
 app = Flask(__name__)
+CORS(app)
 
 DATA_DIR = join(dirname(__file__), 'data')
 DB_NAME = 'covid_db.sqlite'
