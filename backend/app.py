@@ -3,10 +3,12 @@ import sqlite3
 from os.path import join, dirname
 
 from flask import Flask, jsonify
+from flask_cors import CORS
 import pandas as pd
 
 
 app = Flask(__name__)
+CORS(app)
 
 DATA_DIR = join(dirname(__file__), 'data')
 DB_NAME = 'covid_db.sqlite'
@@ -33,6 +35,7 @@ def get_world_covid_data_snapshot(country=None):
                        total_cases
                 from covid_world_hist
                 where date='{SNAP_DT}'
+                and new_deaths
                 and people_vaccinated_per_hundred not null"""
     if country:
         query += f"and location='{country}'"
