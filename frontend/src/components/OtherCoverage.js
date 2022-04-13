@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Form } from 'react-bootstrap';
 import * as d3 from 'd3';
-import './../styles/RaceCoverage.css';
+import './../styles/OtherCoverage.css';
 
 
 export default function HistoricCoverage(props) {
