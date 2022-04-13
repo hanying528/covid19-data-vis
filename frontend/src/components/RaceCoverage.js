@@ -1,10 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
+import { Form } from 'react-bootstrap';
 import * as d3 from 'd3';
 import './../styles/RaceCoverage.css';
 
 
 export default function HistoricCoverage(props) {
     const [raceData, setRaceData] = useState(null);
+    const [raceDate, setRaceDate] = useState(null);
+    const [ageData, setAgeData] = useState(null);
+    const [showAge, setShowAge] = useState(false);
     const ref = useRef();
 
     useEffect(() => {
@@ -16,6 +20,18 @@ export default function HistoricCoverage(props) {
             .then(response => response.json())
             .then(data => {
                 setRaceData(data);
+                setRaceDate(data[0].date);
+            })
+            .catch(error => console.log(error));
+
+        // Request age data
+        const requestAge = {
+            method: 'GET',
+        };
+        fetch(`${props.backendUrl}/covid-usa-snap-age`, requestAge)
+            .then(response => response.json())
+            .then(data => {
+                setAgeData(data);
             })
             .catch(error => console.log(error));
     }, []);
@@ -28,10 +44,12 @@ export default function HistoricCoverage(props) {
 
     useEffect(() => {
         _removeAllChildNodes(ref.current); // remove current graph
-        if(raceData){
+        if(!showAge && raceData){
             createGraph(raceData);
+        }else if(showAge && ageData){
+            createGraph(ageData);
         }
-    }, [raceData]);
+    }, [raceData, ageData, showAge]);
 
     function createGraph(data) {
         // Set the dimensions and margins of the graph
@@ -52,7 +70,7 @@ export default function HistoricCoverage(props) {
         // Add X axis
         const x = d3.scaleBand()
             .range([0, width])
-            .domain(data.map((s) => s.race_group.split('_')[2]))
+            .domain(data.map((s) => showAge ? s.age_group.split('_')[1] : s.race_group.split('_')[2]))
             .padding(0.4)
 
         let max = 0;
@@ -78,7 +96,7 @@ export default function HistoricCoverage(props) {
         barGroups
             .append('rect')
             .attr('class', 'bar')
-            .attr('x', (g) => x(g.race_group.split('_')[2]))
+            .attr('x', (g) => x(showAge ? g.age_group.split('_')[1] : g.race_group.split('_')[2]))
             .attr('y', (g) => y(g.people_had_does1_per_hundred))
             .attr('height', (g) => height - y(g.people_had_does1_per_hundred))
             .attr('width', x.bandwidth())
@@ -86,7 +104,7 @@ export default function HistoricCoverage(props) {
         barGroups
             .append('text')
             .attr('class', 'value')
-            .attr('x', (a) => x(a.race_group.split('_')[2]) + x.bandwidth() / 2)
+            .attr('x', (a) => x(showAge ? a.age_group.split('_')[1] :a.race_group.split('_')[2]) + x.bandwidth() / 2)
             .attr('y', (a) => a.people_had_does1_per_hundred > 5 ? y(a.people_had_does1_per_hundred) + 30 : y(a.people_had_does1_per_hundred)-10)
             .attr('text-anchor', 'middle')
             .attr('fill', (a) => a.people_had_does1_per_hundred > 5 ? 'white' : 'black')
@@ -99,7 +117,7 @@ export default function HistoricCoverage(props) {
             .attr("transform", "rotate(-90)")
             .style('font-family', 'Helvetica')
             .style('font-size', 12)
-            .text('Vaccination Rate (%)');  
+            .text('Vaccination Rate (%)');
 
         SVG.append('text')
             .attr('class', 'label')
@@ -108,16 +126,22 @@ export default function HistoricCoverage(props) {
             .attr('text-anchor', 'middle')
             .style('font-family', 'Helvetica')
             .style('font-size', 12)
-            .text('Race')
+            .text(showAge ? 'Age' : 'Race')
 
     }
 
     return (
         <div className="race-container">
             <h1>Race Coverage</h1>
-            <h5>Vaccination Rate in USA</h5>
-            <div id="pgraphs"></div>
-            <div id="BarChart"></div>
+            <h5>Vaccination Rate in USA ({raceDate})</h5>
+            <div className="switch-wrapper">
+                <span>Daily</span><Form.Switch
+                    id="race-switch"
+                    checked={showAge}
+                    onChange={() => setShowAge(!showAge)}
+                    label="Age"
+                />
+            </div>
             <div ref={ref} />
         </div>
     )
