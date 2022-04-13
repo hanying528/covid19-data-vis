@@ -135,7 +135,7 @@ export default function HistoricCoverage(props) {
             <h1>Race Coverage</h1>
             <h5>Vaccination Rate in USA ({raceDate})</h5>
             <div className="switch-wrapper">
-                <span>Daily</span><Form.Switch
+                <span>Race</span><Form.Switch
                     id="race-switch"
                     checked={showAge}
                     onChange={() => setShowAge(!showAge)}
