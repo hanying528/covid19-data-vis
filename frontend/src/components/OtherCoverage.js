@@ -132,7 +132,7 @@ export default function HistoricCoverage(props) {
 
     return (
         <div className="race-container">
-            <h1>Race Coverage</h1>
+            <h1>Other Coverage</h1>
             <h5>Vaccination Rate in USA ({raceDate})</h5>
             <div className="switch-wrapper">
                 <span>Race</span><Form.Switch
