@@ -14,7 +14,6 @@ def create_app(config=None):
     db.init_app(flask_app)
 
     from backend.app import bp
-
     flask_app.register_blueprint(bp)
 
     return flask_app
