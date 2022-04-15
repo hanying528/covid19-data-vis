@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import './../styles/HistoricCoverage.css';
 import { Form } from 'react-bootstrap';

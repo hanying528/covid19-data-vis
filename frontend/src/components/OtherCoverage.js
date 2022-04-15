@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Form } from 'react-bootstrap';
 import * as d3 from 'd3';
 import './../styles/OtherCoverage.css';

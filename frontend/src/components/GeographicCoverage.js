@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form } from 'react-bootstrap';
 import USAMap from 'react-usa-map';
 import WorldMap from 'react-svg-worldmap';
