@@ -7,6 +7,7 @@ from .db import get_db
 bp = Blueprint('blueprints', __name__, url_prefix='')
 
 SNAP_DT = '2022-03-30'
+WORLD_DATA_SNAP_DT = '2022-03-29'
 
 
 @bp.route('/')
@@ -26,7 +27,7 @@ def get_world_covid_data_snapshot(country=None):
                        new_deaths,
                        total_cases
                 from covid_world_hist
-                where date='{SNAP_DT}'
+                where date='{WORLD_DATA_SNAP_DT}'
                 and people_vaccinated_per_hundred not null
                 """
     if country:
@@ -141,7 +142,7 @@ def get_covid_data_with_country_attr_snapshot(top_n=None):
                        extreme_poverty,
                        handwashing_facilities
                 from covid_world_hist
-                where date='{SNAP_DT}'
+                where date='{WORLD_DATA_SNAP_DT}'
                 and population_density not null
                 and people_vaccinated_per_hundred not null
                 and country_name <> 'World'

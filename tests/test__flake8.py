@@ -1,6 +1,6 @@
 from os.path import abspath, dirname, join
 from subprocess import PIPE, Popen
-import pytest
+
 
 BACKEND_PATH = join(dirname(dirname(abspath(__file__))), 'backend')
 
