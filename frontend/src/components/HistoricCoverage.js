@@ -135,8 +135,6 @@ export default function HistoricCoverage(props) {
             .style("padding", "10px");
 
         var mouseover = function(event, d) {
-            console.log(event)
-            console.log(d)
             tooltip.transition()
                 .style("opacity", 0.8);
             var dailyOptions = { year: 'numeric', month: 'long', day: 'numeric' };
