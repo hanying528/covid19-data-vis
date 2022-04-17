@@ -119,3 +119,18 @@ it("renders correct data for monthly graph", async () => {
         });
     });
 });
+
+it("zooms on graph", async () => {
+    act(() => {
+        let rect = container.querySelector('rect');
+        rect.dispatchEvent(new MouseEvent('wheel', {
+            clientX: 200,
+            clientY: 200,
+            deltaY: -500
+        }));
+    });
+
+    // After zoom, less data shows
+    let circles = container.querySelectorAll('circle');
+    expect(circles.length).toBeLessThan(4);
+});

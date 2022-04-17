@@ -20,25 +20,9 @@ afterEach(() => {
 
 it('renders home page', async () => {
   // Mock fetch 
-  const fakeUsaData = [{
-      state: "CA",
-      people_vaccinated_per_hundred: 80.0
-  }, {
-      state: "PA",
-      people_vaccinated_per_hundred: 70.0
-  }];
-
-  const fakeWorldData = [{
-      country_name: "China",
-      people_vaccinated_per_hundred: 80.0
-  }, {
-      country_name: "Canada",
-      people_vaccinated_per_hundred: 70.0
-  }];
-
   global.fetch = jest.fn()
-      .mockImplementation((url) => Promise.resolve({
-          json: () => Promise.resolve(url === "http://localhost:5000/covid-usa-snap" ? fakeUsaData : fakeWorldData)
+      .mockImplementation(() => Promise.resolve({
+          json: () => Promise.resolve({})
       }));
 
   // Use the asynchronous version of act to apply resolved promises
@@ -54,3 +38,22 @@ it('renders home page', async () => {
   global.fetch.mockClear();
   delete global.fetch;
 });
+
+it('handles fetch error', async () => {
+    // Mock fetch 
+    global.fetch = jest.fn()
+        .mockImplementation(() => Promise.resolve({}));
+  
+    // Use the asynchronous version of act to apply resolved promises
+    // const consoleSpy = jest.spyOn(global.console, 'log');
+    console.log = jest.fn();
+    await act(async () => {
+        render(<App />, container);
+    });
+  
+    expect(console.log).toHaveBeenCalledTimes(6);
+  
+    // remove the mock to ensure tests are completely isolated
+    global.fetch.mockClear();
+    delete global.fetch;
+  });

@@ -14,7 +14,6 @@ beforeEach(async () => {
     // setup a DOM element as a render target
     container = document.createElement("div");
     document.body.appendChild(container);
-    fetchData();
 });
 
 afterEach(() => {
@@ -44,6 +43,9 @@ async function fetchData() {
     }, {
         country_name: "Canada",
         people_vaccinated_per_hundred: 70.0
+    }, {
+        country_name: "Unknown",
+        people_vaccinated_per_hundred: null
     }];
 
     global.fetch = jest.fn()
@@ -57,13 +59,16 @@ async function fetchData() {
     });
 }
 
-it("renders correct color for covid usa map", async () => {  
+it("renders correct color for covid usa map", async () => { 
+    await fetchData();
     // Test color code based on vaccination number
     expect(container.querySelector("[data-name='CA']").getAttribute("fill")).toEqual("#ff0000");
     expect(container.querySelector("[data-name='PA']").getAttribute("fill")).toEqual("#ffc0cb");
 });
 
 it("display correct data when state clicked on usa map", async () => {  
+    await fetchData();
+
     // Click on CA
     var state = document.querySelector("[data-name='CA']");  
     act(() => {
@@ -80,6 +85,8 @@ it("display correct data when state clicked on usa map", async () => {
 });
 
 it("switches between usa and world maps on toggle", async () => {
+    await fetchData();
+
     // Before toggle, show usa map
     expect(container.querySelector('.usa-map')).toBeTruthy();
     expect(container.querySelector('.worldmap__figure-container')).toBeFalsy();
@@ -96,6 +103,8 @@ it("switches between usa and world maps on toggle", async () => {
 });
 
 it("renders correct data for covid world map", async () => {
+    await fetchData();
+
     // Click on geographic-switch to show world map
     var toggle = document.querySelector("[id='geographic-switch']");  
     act(() => {
@@ -114,4 +123,44 @@ it("renders correct data for covid world map", async () => {
         }
     }
     expect(totalColoredCountry).toBe(2);
+});
+
+it("renders correct data for covid world map when there is no data", async () => {
+    // Mock fetch 
+    const fakeUsaData = [{
+        state: "CA",
+        people_vaccinated_per_hundred: 80.0
+    }, {
+        state: "PA",
+        people_vaccinated_per_hundred: 70.0
+    }];
+
+    global.fetch = jest.fn()
+        .mockImplementation((url) => Promise.resolve({
+            json: () => Promise.resolve(url === "http://localhost:5000/covid-usa-snap" ? fakeUsaData : null)
+        }));
+
+    // Use the asynchronous version of act to apply resolved promises
+    await act(async () => {
+        render(<GeographicCoverage backendUrl="http://localhost:5000" />, container);
+    });
+
+    // Click on geographic-switch to show world map
+    var toggle = document.querySelector("[id='geographic-switch']");  
+    act(() => {
+        toggle.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    // Verify that only two countries are colored
+    let paths = container.querySelectorAll('path');
+    var totalColoredCountry = 0;
+    const attr = "fill-opacity: ";
+    for (var i=0; i < paths.length; i++) {
+        let index = paths[i].getAttribute("style").indexOf(attr);
+        let opacity = paths[i].getAttribute("style").substring(index + attr.length, index + attr.length + 3);
+        if (opacity.charAt(1) !== ';') {
+            totalColoredCountry++;
+        }
+    }
+    expect(totalColoredCountry).toBe(0);
 });
